@@ -1,0 +1,9 @@
+blas:
+  - mkl
+  - openblas
+architecture:
+  - sandybridge
+  - ivybridge
+  - haswell
+  - broadwell
+  - bdver2

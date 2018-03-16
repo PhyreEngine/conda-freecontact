@@ -1,0 +1,77 @@
+{% set name = "freecontact" %}
+{% set version = "1.0.21" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: ftp://rostlab.org/free/{{ name }}-{{ version }}.tar.xz
+  sha256: 513c503ace70abc3cbc12d1aff616ffd9b6564a73a584efd7435b804479bd2a8
+  patches:
+  - configure.patch
+  - mkl.patch
+
+build:
+  string: {{ blas }}_{{ architecture }}_{{ environ.get("BUILD_NUMBER", 0) }}
+  features:
+  - arch_{{ architecture }}
+{% if blas != "mkl" %}
+  - nomkl
+{% endif %}
+
+  script: |
+      # Strip -march, -mtune and -O flag from default conda flags.
+      # We are building architecture-specific packages, so this is fine.
+      # We also need to disable c++17 because freecontact uses dynamic
+      # throw specifications.
+      export CXXFLAGS=$(
+          echo "$CXXFLAGS" | sed \
+          -e 's/-std=c++17/-std=c++11/g' \
+          -e 's/-O[^ ]\+//' -e 's/-march=[^ ]\+//' -e 's/-mtune=[^ ]\+//')
+      export CFLAGS=$(
+          echo "$CFLAGS" | sed \
+          -e 's/-O[^ ]\+//' -e 's/-march=[^ ]\+//' -e 's/-mtune=[^ ]\+//')
+      export FCFLAGS=$(
+          echo "$FCFLAGS" | sed \
+          -e 's/-O[^ ]\+//' -e 's/-march=[^ ]\+//' -e 's/-mtune=[^ ]\+//')
+      export CPPFLAGS=$(echo "$CPPFLAGS" | sed -e 's/-O[^ ]\+//')
+      {% if blas == "mkl" %}
+      export CPPFLAGS="$CPPFLAGS -DHAVE_MKL"
+      {% endif %}
+
+      # We patched configure.ac so need to regenerate configure
+      autoreconf -v -i
+      # Explicitly set boost libdir so overzealous autoconf macros don't drag in
+      # system libraries.
+      ./configure \
+        --prefix="$PREFIX" \
+        --with-boost-libdir="$PREFIX/lib"
+      make \
+        O3FLAGS="-O3 -funroll-loops -ffast-math -march={{ architecture }}"
+      make install
+
+requirements:
+  run:
+  - {{ blas }}
+  - libboost
+  - libgfortran-ng
+  host:
+{% if blas != "mkl" %}
+  - nomkl
+{% else %}
+  - mkl-include
+{% endif %}
+  - {{ blas }}
+  - boost
+  - libboost
+  - libgfortran-ng
+  build:
+  - {{ compiler('cxx') }}
+  - {{ compiler('fortran') }}
+  - autoconf
+  - automake
+
+about:
+  home: https://rostlab.org/owiki/index.php/FreeContact
+  license: GPL3

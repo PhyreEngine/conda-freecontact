@@ -1,0 +1,32 @@
+--- a/lib/freecontact.cpp	2018-03-05 16:14:07.979961270 +0000
++++ b/lib/freecontact.cpp	2018-03-05 18:43:08.671211273 +0000
+@@ -20,7 +20,13 @@
+ #include <omp.h>
+ #endif
+ #include <boost/format.hpp>
++
++#ifdef HAVE_MKL
++#include <mkl.h>
++#else
+ #include <cblas.h>
++#endif
++
+ #include <iomanip>
+ #include <iostream>
+ //#include <memory> // auto_ptr, unique_ptr
+@@ -39,6 +45,7 @@
+ //                          n      S         L         thr       maxIt  msg    warm   X         W         Wd        WXj       info   brk
+ extern "C" void glassofast_(int *, g_fp_t *, g_fp_t *, g_fp_t *, int *, int *, int *, g_fp_t *, g_fp_t *, g_fp_t *, g_fp_t *, int *, int *);
+ 
++#ifndef HAVE_MKL
+ extern "C" {
+     // LAPACK Cholesky
+     void spotrf_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO);
+@@ -49,6 +56,7 @@
+     // generate inverse of a matrix given its LU decomposition
+     void sgetri_(int* N, float* A, int* lda, int* IPIV, float* WORK, int* LWORK, int* INFO);
+ }
++#endif
+ 
+ namespace bo = boost;
+ using namespace std;

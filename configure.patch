@@ -1,0 +1,31 @@
+--- a/configure.ac	2013-09-28 08:42:56.000000000 +0100
++++ b/configure.ac	2018-03-05 16:52:45.829523967 +0000
+@@ -29,17 +29,9 @@
+ AC_PROG_LIBTOOL
+ AC_LANG([C++])
+ 
+-[{ t2=$(tempfile); t3=$(tempfile);
+-	trap "rm -f -- '$t2' '$t3'" EXIT
+-	$CXX -c -Q     --help=optimizers > $t2
+-	$CXX -c -Q -O3 --help=optimizers > $t3
+-	# We are especially interested in -ftree-vectorize.
+-	O3FLAGS=$(diff -u0 $t2 $t3 |grep enabled|sed -e 's/.* \(-f[[:alnum:]-]\+\).*/\1/;'|sed -e ':a; N; s/\n/ /; ta';);
+-	rm -f -- '$t2' '$t3';
+-	trap - EXIT;
+-}]
++# No need to individually extract all optimisation flags
++O3FLAGS=-O3
+ AC_SUBST(O3FLAGS)
+-AC_MSG_NOTICE([-O3 enables: $O3FLAGS])
+ 
+ AC_PROG_INSTALL
+ AX_BOOST_BASE
+@@ -68,8 +60,6 @@
+         XERCES_LIBS=""
+     ])
+ 
+-AX_EXT
+-
+ DX_DOT_FEATURE(OFF)
+ DX_PDF_FEATURE(OFF)
+ DX_PS_FEATURE(OFF)
