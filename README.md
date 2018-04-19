@@ -9,7 +9,7 @@ a tool for the prediction of residue-residue contacts from correlated mutations.
 
 ## Building
 
-You should be able to build this package by simply running `conda build .`. A
+You should be able to build this package by simply running `./build`. A
 package will be built for each combination of BLAS library (of `mkl` and
 `openblas`) and each supported CPU architecture.
 
