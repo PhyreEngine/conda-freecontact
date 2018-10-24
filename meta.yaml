@@ -67,7 +67,7 @@ requirements:
   - libboost
   - libgfortran-ng
   build:
-  - {{ compiler('cxx') }}
+  - {{ compiler('cxx') }} 7.2.0
   - {{ compiler('fortran') }}
   - autoconf
   - automake
